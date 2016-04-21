@@ -1,2 +1,6 @@
-# ofxGeographicLib
-An openFrameworks wrapper for the Geographic Library.
+ofxGeographicLib
+======
+
+A wrapper for Geographic Lib http://geographiclib.sourceforge.net/html/
+
+(Formerly part of ofxGeo.)
