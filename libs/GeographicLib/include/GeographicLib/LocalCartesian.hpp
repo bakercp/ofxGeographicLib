@@ -36,7 +36,7 @@ namespace GeographicLib {
    **********************************************************************/
 
   class GEOGRAPHICLIB_EXPORT LocalCartesian {
-  private:
+  public:
     typedef Math::real real;
     static const size_t dim_ = 3;
     static const size_t dim2_ = dim_ * dim_;
@@ -48,7 +48,6 @@ namespace GeographicLib {
     void IntReverse(real x, real y, real z, real& lat, real& lon, real& h,
                     real M[dim2_]) const;
     void MatrixMultiply(real M[dim2_]) const;
-  public:
 
     /**
      * Constructor setting the origin.
