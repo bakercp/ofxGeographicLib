@@ -27,3 +27,4 @@
 
 
 #include <GeographicLib/GeoCoords.hpp>
+#include <GeographicLib/LocalCartesian.hpp>
