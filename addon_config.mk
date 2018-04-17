@@ -6,4 +6,3 @@ meta:
 	ADDON_URL = http://github.com/bakercp/ofxGeographicLib
 
 common:
-	ADDON_DEPENDENCIES = ofxGeo
