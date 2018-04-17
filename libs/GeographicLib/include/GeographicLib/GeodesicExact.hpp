@@ -2,9 +2,9 @@
  * \file GeodesicExact.hpp
  * \brief Header for GeographicLib::GeodesicExact class
  *
- * Copyright (c) Charles Karney (2012-2015) <charles@karney.com> and licensed
+ * Copyright (c) Charles Karney (2012-2016) <charles@karney.com> and licensed
  * under the MIT/X11 License.  For more information, see
- * http://geographiclib.sourceforge.net/
+ * https://geographiclib.sourceforge.io/
  **********************************************************************/
 
 #if !defined(GEOGRAPHICLIB_GEODESICEXACT_HPP)
@@ -33,7 +33,7 @@ namespace GeographicLib {
    * for \e f &isin; [-0.01, 0.01].  The GeodesicExact class computes the
    * ellitpic integrals directly and so provides a solution which is valid for
    * all \e f.  However, in practice, its use should be limited to about
-   * <i>b</i>/\e a &isin; [0.01, 100] or \e f &isin; [-99, 0.99].
+   * <i>b</i>/\e a &isin; [0.01, 100] or \e f &isin; [&minus;99, 0.99].
    *
    * For the WGS84 ellipsoid, these classes are 2--3 times \e slower than the
    * series solution and 2--3 times \e less \e accurate (because it's less easy
@@ -125,7 +125,7 @@ namespace GeographicLib {
                   real& salp2, real& calp2, real& sig12,
                   real& ssig1, real& csig1, real& ssig2, real& csig2,
                   EllipticFunction& E,
-                  real& somg12, real& comg12, bool diffp, real& dlam12) const;
+                  real& domg12, bool diffp, real& dlam12) const;
     real GenInverse(real lat1, real lon1, real lat2, real lon2,
                     unsigned outmask, real& s12,
                     real& salp1, real& calp1, real& salp2, real& calp2,
@@ -139,7 +139,7 @@ namespace GeographicLib {
     // the rest.  This choice avoids double rounding with doubles and higher
     // precision types.  float coefficients will suffer double rounding;
     // however the accuracy is already lousy for floats.
-    static Math::real inline reale(long long hi, long long lo) {
+    static Math::real reale(long long hi, long long lo) {
       using std::ldexp;
       return ldexp(real(hi), 52) + lo;
     }
@@ -258,7 +258,7 @@ namespace GeographicLib {
      *
      * \e lat1 should be in the range [&minus;90&deg;, 90&deg;].  The values of
      * \e lon2 and \e azi2 returned are in the range [&minus;180&deg;,
-     * 180&deg;).
+     * 180&deg;].
      *
      * If either point is at a pole, the azimuth is defined by keeping the
      * longitude fixed, writing \e lat = &plusmn;(90&deg; &minus; &epsilon;),
@@ -371,7 +371,7 @@ namespace GeographicLib {
      *
      * \e lat1 should be in the range [&minus;90&deg;, 90&deg;].  The values of
      * \e lon2 and \e azi2 returned are in the range [&minus;180&deg;,
-     * 180&deg;).
+     * 180&deg;].
      *
      * If either point is at a pole, the azimuth is defined by keeping the
      * longitude fixed, writing \e lat = &plusmn;(90&deg; &minus; &epsilon;),
@@ -509,7 +509,7 @@ namespace GeographicLib {
      * - \e outmask |= GeodesicExact::AREA for the area \e S12;
      * - \e outmask |= GeodesicExact::ALL for all of the above;
      * - \e outmask |= GeodesicExact::LONG_UNROLL to unroll \e lon2 instead of
-     *   wrapping it into the range [&minus;180&deg;, 180&deg;).
+     *   wrapping it into the range [&minus;180&deg;, 180&deg;].
      * .
      * The function value \e a12 is always computed and returned and this
      * equals \e s12_a12 is \e arcmode is true.  If \e outmask includes
@@ -551,15 +551,16 @@ namespace GeographicLib {
      *
      * \e lat1 and \e lat2 should be in the range [&minus;90&deg;, 90&deg;].
      * The values of \e azi1 and \e azi2 returned are in the range
-     * [&minus;180&deg;, 180&deg;).
+     * [&minus;180&deg;, 180&deg;].
      *
      * If either point is at a pole, the azimuth is defined by keeping the
      * longitude fixed, writing \e lat = &plusmn;(90&deg; &minus; &epsilon;),
      * and taking the limit &epsilon; &rarr; 0+.
      *
-     * The following functions are overloaded versions of GeodesicExact::Inverse
-     * which omit some of the output parameters.  Note, however, that the arc
-     * length is always computed and returned as the function value.
+     * The following functions are overloaded versions of
+     * GeodesicExact::Inverse which omit some of the output parameters.  Note,
+     * however, that the arc length is always computed and returned as the
+     * function value.
      **********************************************************************/
     Math::real Inverse(real lat1, real lon1, real lat2, real lon2,
                        real& s12, real& azi1, real& azi2, real& m12,
@@ -725,8 +726,8 @@ namespace GeographicLib {
      * fixed, writing \e lat1 = &plusmn;(90 &minus; &epsilon;), and taking the
      * limit &epsilon; &rarr; 0+.
      **********************************************************************/
-    GeodesicLineExact Line(real lat1, real lon1, real azi1, unsigned caps = ALL)
-      const;
+    GeodesicLineExact Line(real lat1, real lon1, real azi1,
+                           unsigned caps = ALL) const;
 
     /**
      * Define a GeodesicLineExact in terms of the inverse geodesic problem.
@@ -850,8 +851,8 @@ namespace GeographicLib {
     ///@}
 
     /**
-     * A global instantiation of GeodesicExact with the parameters for the WGS84
-     * ellipsoid.
+     * A global instantiation of GeodesicExact with the parameters for the
+     * WGS84 ellipsoid.
      **********************************************************************/
     static const GeodesicExact& WGS84();
 
