@@ -28,16 +28,18 @@ void ofApp::setup()
                  lon,
                  alt);
 
-    glm::dvec3 p;
-    proj.Forward(lat, lon, alt, p.x, p.y, p.z);
-    p /= scale;
+    double px, py, pz;
+    proj.Forward(lat, lon, alt, px, py, pz);
+    px /= scale;
+    py /= scale;
+    pz /= scale;
     
-    std::cout << "~ ~ ~ cpp ~ ~ ~" << std::endl;
+    std::cout << "~ ~ ~ ~ ~ ~ ~ ~" << std::endl;
     std::cout << "LLA home point: " << home_point[0] << " " << home_point[1] << " " << home_point[2] << std::endl;
     std::cout << "+ XYZ offset: " << offset[0] << " " << offset[1] << " " << offset[2] << std::endl;
     std::cout << " . . . . . . . ." << std::endl;
     std::cout << "As LLA: " << lat << " " << lon << " " << alt << std::endl;
-    std::cout << "Back to XYZ: " << ofToString(p) << std::endl;
+    std::cout << "Back to XYZ: " << px << " " << py << " " << pz << std::endl;
     std::cout << "~ ~ ~ ~ ~ ~ ~ ~" << std::endl;
 }
 
