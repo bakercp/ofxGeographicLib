@@ -4,5 +4,3 @@ meta:
 	ADDON_AUTHOR = bakercp
 	ADDON_TAGS = "geo" "mapping" "gps" "geographiclib"
 	ADDON_URL = http://github.com/bakercp/ofxGeographicLib
-
-common:
