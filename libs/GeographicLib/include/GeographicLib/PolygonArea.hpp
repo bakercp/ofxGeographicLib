@@ -4,7 +4,7 @@
  *
  * Copyright (c) Charles Karney (2010-2016) <charles@karney.com> and licensed
  * under the MIT/X11 License.  For more information, see
- * http://geographiclib.sourceforge.net/
+ * https://geographiclib.sourceforge.io/
  **********************************************************************/
 
 #if !defined(GEOGRAPHICLIB_POLYGONAREA_HPP)
@@ -23,13 +23,13 @@ namespace GeographicLib {
    * This computes the area of a polygon whose edges are geodesics using the
    * method given in Section 6 of
    * - C. F. F. Karney,
-   *   <a href="https://dx.doi.org/10.1007/s00190-012-0578-z">
+   *   <a href="https://doi.org/10.1007/s00190-012-0578-z">
    *   Algorithms for geodesics</a>,
    *   J. Geodesy <b>87</b>, 43--55 (2013);
-   *   DOI: <a href="https://dx.doi.org/10.1007/s00190-012-0578-z">
+   *   DOI: <a href="https://doi.org/10.1007/s00190-012-0578-z">
    *   10.1007/s00190-012-0578-z</a>;
    *   addenda:
-   *   <a href="http://geographiclib.sourceforge.net/geod-addenda.html">
+   *   <a href="https://geographiclib.sourceforge.io/geod-addenda.html">
    *   geod-addenda.html</a>.
    *
    * This class lets you add vertices and edges one at a time to the polygon.
@@ -73,21 +73,23 @@ namespace GeographicLib {
     int _crossings;
     Accumulator<> _areasum, _perimetersum;
     real _lat0, _lon0, _lat1, _lon1;
-    static inline int transit(real lon1, real lon2) {
+    static int transit(real lon1, real lon2) {
       // Return 1 or -1 if crossing prime meridian in east or west direction.
       // Otherwise return zero.
       // Compute lon12 the same way as Geodesic::Inverse.
       lon1 = Math::AngNormalize(lon1);
       lon2 = Math::AngNormalize(lon2);
       real lon12 = Math::AngDiff(lon1, lon2);
+      // Treat 0 as negative in these tests.  This balances +/- 180 being
+      // treated as positive, i.e., +180.
       int cross =
-        lon1 < 0 && lon2 >= 0 && lon12 > 0 ? 1 :
-        (lon2 < 0 && lon1 >= 0 && lon12 < 0 ? -1 : 0);
+        lon1 <= 0 && lon2 > 0 && lon12 > 0 ? 1 :
+        (lon2 <= 0 && lon1 > 0 && lon12 < 0 ? -1 : 0);
       return cross;
     }
     // an alternate version of transit to deal with longitudes in the direct
     // problem.
-    static inline int transitdirect(real lon1, real lon2) {
+    static int transitdirect(real lon1, real lon2) {
       // We want to compute exactly
       //   int(floor(lon2 / 360)) - int(floor(lon1 / 360))
       // Since we only need the parity of the result we can use std::remquo;
@@ -252,7 +254,7 @@ namespace GeographicLib {
      * @param[out] lon the longitude of the point (degrees).
      *
      * If no points have been added, then NaNs are returned.  Otherwise, \e lon
-     * will be in the range [&minus;180&deg;, 180&deg;).
+     * will be in the range [&minus;180&deg;, 180&deg;].
      **********************************************************************/
     void CurrentPoint(real& lat, real& lon) const
     { lat = _lat1; lon = _lon1; }

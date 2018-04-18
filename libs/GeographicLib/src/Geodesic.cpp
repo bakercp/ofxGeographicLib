@@ -2,9 +2,9 @@
  * \file Geodesic.cpp
  * \brief Implementation for GeographicLib::Geodesic class
  *
- * Copyright (c) Charles Karney (2009-2016) <charles@karney.com> and licensed
+ * Copyright (c) Charles Karney (2009-2017) <charles@karney.com> and licensed
  * under the MIT/X11 License.  For more information, see
- * http://geographiclib.sourceforge.net/
+ * https://geographiclib.sourceforge.io/
  *
  * This is a reformulation of the geodesic problem.  The notation is as
  * follows:
@@ -74,13 +74,13 @@ namespace GeographicLib {
       // sig12 = etol2.  Here 0.1 is a safety factor (error decreased by 100)
       // and max(0.001, abs(f)) stops etol2 getting too large in the nearly
       // spherical case.
-    , _etol2(0.1 * tol2_ /
+    , _etol2(real(0.1) * tol2_ /
              sqrt( max(real(0.001), abs(_f)) * min(real(1), 1 - _f/2) / 2 ))
   {
     if (!(Math::isfinite(_a) && _a > 0))
-      throw GeographicErr("Major radius is not positive");
+      throw GeographicErr("Equatorial radius is not positive");
     if (!(Math::isfinite(_b) && _b > 0))
-      throw GeographicErr("Minor radius is not positive");
+      throw GeographicErr("Polar semi-axis is not positive");
     A3coeff();
     C3coeff();
     C4coeff();
@@ -115,8 +115,8 @@ namespace GeographicLib {
       : cosx * (y0 - y1);       // cos(x) * (y0 - y1)
   }
 
-  GeodesicLine Geodesic::Line(real lat1, real lon1, real azi1, unsigned caps)
-    const {
+  GeodesicLine Geodesic::Line(real lat1, real lon1, real azi1,
+                              unsigned caps) const {
     return GeodesicLine(*this, lat1, lon1, azi1, caps);
   }
 
@@ -160,8 +160,8 @@ namespace GeographicLib {
                                   unsigned outmask, real& s12,
                                   real& salp1, real& calp1,
                                   real& salp2, real& calp2,
-                                  real& m12, real& M12, real& M21, real& S12)
-    const {
+                                  real& m12, real& M12, real& M21,
+                                  real& S12) const {
     // Compute longitude difference (AngDiff does this carefully).  Result is
     // in [-180, 180] but -180 is only for west-going geodesics.  180 is for
     // east-going and meridional geodesics.
@@ -258,7 +258,7 @@ namespace GeographicLib {
 
       // sig12 = sig2 - sig1
       sig12 = atan2(max(real(0), csig1 * ssig2 - ssig1 * csig2),
-                    csig1 * csig2 + ssig1 * ssig2);
+                                 csig1 * csig2 + ssig1 * ssig2);
       {
         real dummy;
         Lengths(_n, sig12, ssig1, csig1, dn1, ssig2, csig2, dn2, cbet1, cbet2,
@@ -334,7 +334,7 @@ namespace GeographicLib {
         // guess is taken to be (alp1a + alp1b) / 2.
         //
         // initial values to suppress warnings (if loop is executed 0 times)
-        real ssig1 = 0, csig1 = 0, ssig2 = 0, csig2 = 0, eps = 0;
+        real ssig1 = 0, csig1 = 0, ssig2 = 0, csig2 = 0, eps = 0, domg12 = 0;
         unsigned numit = 0;
         // Bracketing range
         real salp1a = tiny_, calp1a = 1, salp1b = tiny_, calp1b = -1;
@@ -347,7 +347,7 @@ namespace GeographicLib {
           real v = Lambda12(sbet1, cbet1, dn1, sbet2, cbet2, dn2, salp1, calp1,
                             slam12, clam12,
                             salp2, calp2, sig12, ssig1, csig1, ssig2, csig2,
-                            eps, somg12, comg12, numit < maxit1_, dv, Ca);
+                            eps, domg12, numit < maxit1_, dv, Ca);
           // Reversed test to allow escape with NaNs
           if (tripb || !(abs(v) >= (tripn ? 8 : 1) * tol0_)) break;
           // Update bracketing values
@@ -372,7 +372,7 @@ namespace GeographicLib {
               continue;
             }
           }
-          // Either dv was not postive or updated value was outside legal
+          // Either dv was not positive or updated value was outside legal
           // range.  Use the midpoint of the bracket as the next estimate.
           // This mechanism is not needed for the WGS84 ellipsoid, but it does
           // catch problems with more eccentric ellipsoids.  Its efficacy is
@@ -399,6 +399,12 @@ namespace GeographicLib {
         m12x *= _b;
         s12x *= _b;
         a12 = sig12 / Math::degree();
+        if (outmask & AREA) {
+          // omg12 = lam12 - domg12
+          real sdomg12 = sin(domg12), cdomg12 = cos(domg12);
+          somg12 = slam12 * cdomg12 - clam12 * sdomg12;
+          comg12 = clam12 * cdomg12 + slam12 * sdomg12;
+        }
       }
     }
 
@@ -434,11 +440,8 @@ namespace GeographicLib {
         // Avoid problems with indeterminate sig1, sig2 on equator
         S12 = 0;
 
-      if (!meridian) {
-        if (somg12 > 1) {
-          somg12 = sin(omg12); comg12 = cos(omg12);
-        } else
-          Math::norm(somg12, comg12);
+      if (!meridian && somg12 > 1) {
+        somg12 = sin(omg12); comg12 = cos(omg12);
       }
 
       if (!meridian &&
@@ -490,8 +493,8 @@ namespace GeographicLib {
   Math::real Geodesic::GenInverse(real lat1, real lon1, real lat2, real lon2,
                                   unsigned outmask,
                                   real& s12, real& azi1, real& azi2,
-                                  real& m12, real& M12, real& M21, real& S12)
-    const {
+                                  real& m12, real& M12, real& M21,
+                                  real& S12) const {
     outmask &= OUT_MASK;
     real salp1, calp1, salp2, calp2,
       a12 =  GenInverse(lat1, lon1, lat2, lon2,
@@ -504,7 +507,8 @@ namespace GeographicLib {
     return a12;
   }
 
-  GeodesicLine Geodesic::InverseLine(real lat1, real lon1, real lat2, real lon2,
+  GeodesicLine Geodesic::InverseLine(real lat1, real lon1,
+                                     real lat2, real lon2,
                                      unsigned caps) const {
     real t, salp1, calp1, salp2, calp2,
       a12 = GenInverse(lat1, lon1, lat2, lon2,
@@ -514,14 +518,16 @@ namespace GeographicLib {
       azi1 = Math::atan2d(salp1, calp1);
     // Ensure that a12 can be converted to a distance
     if (caps & (OUT_MASK & DISTANCE_IN)) caps |= DISTANCE;
-    return GeodesicLine(*this, lat1, lon1, azi1, salp1, calp1, caps, true, a12);
+    return
+      GeodesicLine(*this, lat1, lon1, azi1, salp1, calp1, caps, true, a12);
   }
 
   void Geodesic::Lengths(real eps, real sig12,
                          real ssig1, real csig1, real dn1,
                          real ssig2, real csig2, real dn2,
                          real cbet1, real cbet2, unsigned outmask,
-                         real& s12b, real& m12b, real& m0, real& M12, real& M21,
+                         real& s12b, real& m12b, real& m0,
+                         real& M12, real& M21,
                          // Scratch area of the right size
                          real Ca[]) const {
     // Return m12b = (reduced length)/_b; also calculate s12b = distance/_b,
@@ -606,7 +612,7 @@ namespace GeographicLib {
         // N.B. cbrt always returns the real root.  cbrt(-8) = -2.
         real T = Math::cbrt(T3); // T = r * t
         // T can be zero; but then r2 / T -> 0.
-        u += T + (T ? r2 / T : 0);
+        u += T + (T != 0 ? r2 / T : 0);
       } else {
         // T is complex, but the way u is defined the result is real.
         real ang = atan2(sqrt(-disc), -(S + r3));
@@ -732,7 +738,8 @@ namespace GeographicLib {
         // Inverse.
         Lengths(_n, Math::pi() + bet12a,
                 sbet1, -cbet1, dn1, sbet2, cbet2, dn2,
-                cbet1, cbet2, REDUCEDLENGTH, dummy, m12b, m0, dummy, dummy, Ca);
+                cbet1, cbet2,
+                REDUCEDLENGTH, dummy, m12b, m0, dummy, dummy, Ca);
         x = -1 + m12b / (cbet1 * cbet2 * m0 * Math::pi());
         betscale = x < -real(0.01) ? sbet12a / x :
           -_f * Math::sq(cbet1) * Math::pi();
@@ -810,7 +817,7 @@ namespace GeographicLib {
                                 real& sig12,
                                 real& ssig1, real& csig1,
                                 real& ssig2, real& csig2,
-                                real& eps, real& somg12, real& comg12,
+                                real& eps, real& domg12,
                                 bool diffp, real& dlam12,
                                 // Scratch area of the right size
                                 real Ca[]) const {
@@ -825,7 +832,7 @@ namespace GeographicLib {
       salp0 = salp1 * cbet1,
       calp0 = Math::hypot(calp1, salp1 * sbet1); // calp0 > 0
 
-    real somg1, comg1, somg2, comg2, lam12;
+    real somg1, comg1, somg2, comg2, somg12, comg12, lam12;
     // tan(bet1) = tan(sig1) * cos(alp1)
     // tan(omg1) = sin(alp0) * tan(sig1) = tan(omg1)=tan(alp1)*sin(bet1)
     ssig1 = sbet1; somg1 = salp0 * sbet1;
@@ -857,7 +864,7 @@ namespace GeographicLib {
 
     // sig12 = sig2 - sig1, limit to [0, pi]
     sig12 = atan2(max(real(0), csig1 * ssig2 - ssig1 * csig2),
-                  csig1 * csig2 + ssig1 * ssig2);
+                               csig1 * csig2 + ssig1 * ssig2);
 
     // omg12 = omg2 - omg1, limit to [0, pi]
     somg12 = max(real(0), comg1 * somg2 - somg1 * comg2);
@@ -871,7 +878,8 @@ namespace GeographicLib {
     C3f(eps, Ca);
     B312 = (SinCosSeries(true, ssig2, csig2, Ca, nC3_-1) -
             SinCosSeries(true, ssig1, csig1, Ca, nC3_-1));
-    lam12 = eta - _f * A3f(eps) * salp0 * (sig12 + B312);
+    domg12 = -_f * A3f(eps) * salp0 * (sig12 + B312);
+    lam12 = eta + domg12;
 
     if (diffp) {
       if (calp2 == 0)

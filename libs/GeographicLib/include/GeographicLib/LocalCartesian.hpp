@@ -2,9 +2,9 @@
  * \file LocalCartesian.hpp
  * \brief Header for GeographicLib::LocalCartesian class
  *
- * Copyright (c) Charles Karney (2008-2015) <charles@karney.com> and licensed
+ * Copyright (c) Charles Karney (2008-2016) <charles@karney.com> and licensed
  * under the MIT/X11 License.  For more information, see
- * http://geographiclib.sourceforge.net/
+ * https://geographiclib.sourceforge.io/
  **********************************************************************/
 
 #if !defined(GEOGRAPHICLIB_LOCALCARTESIAN_HPP)
@@ -154,7 +154,7 @@ namespace GeographicLib {
      * @param[out] h height of point above the ellipsoid (meters).
      *
      * The value of \e lon returned is in the range [&minus;180&deg;,
-     * 180&deg;).
+     * 180&deg;].
      **********************************************************************/
     void Reverse(real x, real y, real z, real& lat, real& lon, real& h)
       const {

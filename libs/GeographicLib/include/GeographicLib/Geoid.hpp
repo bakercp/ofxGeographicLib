@@ -4,7 +4,7 @@
  *
  * Copyright (c) Charles Karney (2009-2015) <charles@karney.com> and licensed
  * under the MIT/X11 License.  For more information, see
- * http://geographiclib.sourceforge.net/
+ * https://geographiclib.sourceforge.io/
  **********************************************************************/
 
 #if !defined(GEOGRAPHICLIB_GEOID_HPP)
@@ -226,9 +226,11 @@ namespace GeographicLib {
     /**
      * Set up a cache.
      *
-     * @param[in] south latitude (degrees) of the south edge of the cached area.
+     * @param[in] south latitude (degrees) of the south edge of the cached
+     *   area.
      * @param[in] west longitude (degrees) of the west edge of the cached area.
-     * @param[in] north latitude (degrees) of the north edge of the cached area.
+     * @param[in] north latitude (degrees) of the north edge of the cached
+     *   area.
      * @param[in] east longitude (degrees) of the east edge of the cached area.
      * @exception GeographicErr if the memory necessary for caching the data
      *   can't be allocated (in this case, you will have no cache and can try
@@ -277,7 +279,8 @@ namespace GeographicLib {
      * @param[in] lat latitude of the point (degrees).
      * @param[in] lon longitude of the point (degrees).
      * @exception GeographicErr if there's a problem reading the data; this
-     *   never happens if (\e lat, \e lon) is within a successfully cached area.
+     *   never happens if (\e lat, \e lon) is within a successfully cached
+     *   area.
      * @return the height of the geoid above the ellipsoid (meters).
      *
      * The latitude should be in [&minus;90&deg;, 90&deg;].
@@ -298,7 +301,8 @@ namespace GeographicLib {
      *   geoid to a height above the ellipsoid; Geoid::ELLIPSOIDTOGEOID means
      *   convert a height above the ellipsoid to a height above the geoid.
      * @exception GeographicErr if there's a problem reading the data; this
-     *   never happens if (\e lat, \e lon) is within a successfully cached area.
+     *   never happens if (\e lat, \e lon) is within a successfully cached
+     *   area.
      * @return converted height (meters).
      **********************************************************************/
     Math::real ConvertHeight(real lat, real lon, real h,
